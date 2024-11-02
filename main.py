@@ -4,11 +4,13 @@ from parser import ParseFile
 from math import sqrt
 
 
+# markers are "location pins" on the map
 class Marker():
     def __init__(self, coords, color = "Red"):
         self.coords = coords
         self.color = color
 
+    # returns the distance between a marker and other along a straight line
     def GetLineDistance(self, other):
         
         if not isinstance(Marker):
@@ -22,17 +24,22 @@ class Marker():
         return distance
 
 
+# subclass of Marker with default color as blue
 class LocationMarker(Marker):
     def __init__(self, coords, color = "blue"):
         super().__init__(coords, color)
 
+
+# subclass of Marker with default color as green
 class PathMarker(Marker):
     def __init__(self, coords, color = "green"):
         super().__init__(coords, color)
 
 
+# draws the markers on the canvas provided
 def DrawMarkers(markers, canvas):
 
+    # checks if the markers is list of markers or a single marker
     if isinstance(markers, list):
         for marker in markers:
             x, y = marker.coords
@@ -42,16 +49,19 @@ def DrawMarkers(markers, canvas):
         x, y = markers.coords
         canvas.create_rectangle(x, y, x + 5, y + 5, fill=markers.color)
 
+# creates and returns a canvas of entered background color
 def CreateMap(root, canvasBackground):
     canvas = tk.Canvas(root, bg = canvasBackground)
     canvas.pack(fill = tk.BOTH, expand = True)
 
     return canvas
 
+# returns location and path markers from the coords entered in the coords.txt file
 def GetMarkersFromFile(file):
-    locationMarkerCoords, pathMarkerCoords = ParseFile(file)
     locationMarkers = []
     pathMarkers = []
+
+    locationMarkerCoords, pathMarkerCoords = ParseFile(file)
 
     for i in locationMarkerCoords:
         locationMarkers.append(LocationMarker(i))
@@ -62,11 +72,13 @@ def GetMarkersFromFile(file):
     return locationMarkers, pathMarkers
 
 
+# root window
 root = tk.Tk("Nav_sys")
 
 root.geometry("800x600")
 root.title("Campus Navigation System")
 
+# paths handling using os
 cwd = os.getcwd()
 file = os.path.join(cwd, "coords.txt")
 
