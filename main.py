@@ -1,4 +1,6 @@
 import tkinter as tk
+import os
+from parser import ParseFile
 from math import sqrt
 
 
@@ -21,10 +23,12 @@ class Marker():
 
 
 class LocationMarker(Marker):
-    pass
+    def __init__(self, coords, color = "blue"):
+        super().__init__(coords, color)
 
 class PathMarker(Marker):
-    pass
+    def __init__(self, coords, color = "green"):
+        super().__init__(coords, color)
 
 
 def DrawMarkers(markers, canvas):
@@ -32,13 +36,11 @@ def DrawMarkers(markers, canvas):
     if isinstance(markers, list):
         for marker in markers:
             x, y = marker.coords
-            canvas.create_rectangle(x, y, x + 5, y + 5, fill=marker.color, outline="red")
-            print("list")
+            canvas.create_rectangle(x, y, x + 5, y + 5, fill=marker.color)
 
     else:
         x, y = markers.coords
-        canvas.create_rectangle(x, y, x + 5, y + 5, fill=markers.color, outline="red")
-        print("not list")
+        canvas.create_rectangle(x, y, x + 5, y + 5, fill=markers.color)
 
 def CreateMap(root, canvasBackground):
     canvas = tk.Canvas(root, bg = canvasBackground)
@@ -46,19 +48,33 @@ def CreateMap(root, canvasBackground):
 
     return canvas
 
+def GetMarkersFromFile(file):
+    locationMarkerCoords, pathMarkerCoords = ParseFile(file)
+    locationMarkers = []
+    pathMarkers = []
+
+    for i in locationMarkerCoords:
+        locationMarkers.append(LocationMarker(i))
+    for i in pathMarkerCoords:
+        for j in i:
+            pathMarkers.append(PathMarker(j))
+
+    return locationMarkers, pathMarkers
+
 
 root = tk.Tk("Nav_sys")
 
 root.geometry("800x600")
 root.title("Campus Navigation System")
 
+cwd = os.getcwd()
+file = os.path.join(cwd, "coords.txt")
+
 map = CreateMap(root, "black")
 
-markers = []
+locationMarkers, pathMarkers = GetMarkersFromFile(file)
 
-markers.append(PathMarker((200, 200)))
-markers.append(PathMarker((100, 300), "green"))
-
-DrawMarkers(markers, map)
+DrawMarkers(locationMarkers, map)
+DrawMarkers(pathMarkers, map)
 
 root.mainloop()
