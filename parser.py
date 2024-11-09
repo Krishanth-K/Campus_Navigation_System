@@ -10,6 +10,9 @@ def ParseFile(filePath):
         # i is the index of the line
         for i, line in enumerate(lines):
 
+            if line.startswith("--"):
+                continue            
+
             if line.startswith("Location:"):
                 # check if next line exists
                 if i + 1 < len(lines):
@@ -40,6 +43,7 @@ def ParseFile(filePath):
                     coordsLine = lines[c].strip()
                     coordsLine = coordsLine.removeprefix("(").removesuffix(")").strip()
                     # print(coordsLine)
+
                     #convert the integers into a tuple
                     coord = tuple(map(int, coordsLine.split(", ")))
 
@@ -49,4 +53,3 @@ def ParseFile(filePath):
                 PathMarkerCoords.append(pathCoords)
 
     return locationMarkerCoords, PathMarkerCoords
-
