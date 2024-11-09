@@ -43,15 +43,16 @@ def dropdown():
     confirmbutton.place(relx=0.5, rely=0.6, anchor="center")
 
 #creating back button
-def crbackbutton():
+def crhomebutton():
     global backbutton
-    backbutton = ttk.Button(left, text="Go back", command=clbackbutton)
-    backbutton.place(relx=0.5, rely=0.8, anchor="center")
+    backbutton = ttk.Button(left, text="Home", command=clbackbutton)
+    backbutton.place(relx=0.5, rely=0.9, anchor="center")
 
 #clicking back button
 def clbackbutton():
     resetui()
     dropdown()
+    backbutton.destroy()
 
 #creating history button
 def crhistorrybutton():
@@ -61,8 +62,33 @@ def crhistorrybutton():
 
 #clicking history button
 def clhistorybutton():
+    global log
     resetui()
-    crbackbutton()
+    disp.destroy()
+    with open("cps.txt","r") as file:
+        history=file.read()
+        log=ttk.Label(left,text=history,font=cusfont,background="black",foreground="white")
+        log.place(relx=0.5,rely=0.5,anchor="center")
+    crhomebutton()
+    historybutton.destroy()
+    crclrhistorybutton()
+
+#creating clear history button
+def crclrhistorybutton():
+    global clrhistorybutton  
+    clrhistorybutton = ttk.Button(left, text="Clear history", command=clclrhistorybutton)
+    clrhistorybutton.place(relx=0.5, rely=0.7, anchor="center")
+
+# clicking clear history button
+def clclrhistorybutton():
+    global clearmsg
+    with open("cps.txt", "w") as file:
+        pass
+    log.destroy()
+    clrhistorybutton.destroy()
+    clearmsg = ttk.Label(left, text="History cleared", font=cusfont, background="black", foreground="white")
+    clearmsg.place(relx=0.5, rely=0.5, anchor="center")
+
 
 #clicking confirm button
 def clconfirmbutton():
@@ -74,7 +100,10 @@ def clconfirmbutton():
     menu.destroy()
     confirmbutton.destroy()
 
-    crbackbutton()
+    with open("cps.txt","a") as file:
+        file.write(f"{selopt}\n")
+
+    crhomebutton()
     crhistorrybutton()
 
 #reset user interface
@@ -86,11 +115,15 @@ def resetui():
         historybutton.destroy()
         backbutton.destroy()
         disp.destroy()
+        log.destroy()
+        clrhistorybutton.destroy()
+        clearmsg.destroy()
     except:
         pass
 
 def start():
     dropdown()
+    crhomebutton()
 
 start()
 
