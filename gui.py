@@ -28,30 +28,49 @@ left.grid(row=0, column=0, sticky="nswe")
 right = tk.Frame(main_frame, width=900, height=600, bg="white")
 right.grid(row=0, column=1, sticky="nswe")
 
-#dropdown menu
+
+# Dropdown menu
 def dropdown():
-    global ask, sel, menu, confirmbutton
+    global ask, sel, menu, confirmbutton, placeholder_label
     ask = ttk.Label(left, text="Select destination", font=cusfont, background="black", foreground="white")
     ask.place(relx=0.5, rely=0.3, anchor="center")
+    
+    # Dropdown menu options
     options = ["AB1", "AB2", "AB3", "AB4", "Library", "Main Canteen", "IT Canteen", "Business Canteen", "Business School", "Playground"]
     sel = tk.StringVar()
+
+    # Create the Combobox
     menu = ttk.Combobox(left, values=options, textvariable=sel, font=cusfont)
     menu.place(relx=0.5, rely=0.5, anchor="center")
 
-    #confirm button
+    # Add placeholder label centered on top of the dropdown
+    placeholder_label = ttk.Label(left, text="Pick an option below", font=cusfont, foreground="gray")
+    placeholder_label.place(relx=0.5, rely=0.5, anchor="center")
+
+    # Hide the placeholder text when an option is selected
+    def on_select(event):
+        placeholder_label.place_forget()
+    
+    menu.bind("<<ComboboxSelected>>", on_select)
+
+    # Confirm button
     confirmbutton = ttk.Button(left, text="Confirm selection", command=clconfirmbutton)
     confirmbutton.place(relx=0.5, rely=0.6, anchor="center")
 
-#creating back button
+
+
+
+#creating home button
 def crhomebutton():
     global backbutton
     backbutton = ttk.Button(left, text="Home", command=clbackbutton)
     backbutton.place(relx=0.5, rely=0.9, anchor="center")
 
-#clicking back button
+#clicking home button
 def clbackbutton():
     resetui()
     dropdown()
+    crhistorrybutton()
     backbutton.destroy()
 
 #creating history button
@@ -64,14 +83,23 @@ def crhistorrybutton():
 def clhistorybutton():
     global log
     resetui()
-    disp.destroy()
-    with open("cps.txt","r") as file:
-        history=file.read()
-        log=ttk.Label(left,text=history,font=cusfont,background="black",foreground="white")
-        log.place(relx=0.5,rely=0.5,anchor="center")
-    crhomebutton()
-    historybutton.destroy()
+    try:
+        disp.destroy()
+    except:
+        pass
+
+    with open("cps.txt", "r") as file:
+        history = file.read().strip()
+    
+    if not history:
+        history = "No results"
+    
+    log = ttk.Label(left, text=history, font=cusfont, background="black", foreground="white")
+    log.place(relx=0.5, rely=0.5, anchor="center")
+
     crclrhistorybutton()
+    crhomebutton()
+
 
 #creating clear history button
 def crclrhistorybutton():
@@ -90,21 +118,26 @@ def clclrhistorybutton():
     clearmsg.place(relx=0.5, rely=0.5, anchor="center")
 
 
-#clicking confirm button
+# clicking confirm button
 def clconfirmbutton():
-    global sel, ask, menu, confirmbutton,disp
+    global sel, ask, menu, confirmbutton, disp
     selopt = sel.get()
-    disp = ttk.Label(left, text=f"Selected Destination: {selopt}", font=cusfont, background="black", foreground="white")
+
+    if not selopt:
+        disp = ttk.Label(left, text="No option selected", font=cusfont, background="black", foreground="white")
+    else:
+        disp = ttk.Label(left, text=f"Selected Destination: {selopt}", font=cusfont, background="black", foreground="white")
+        with open("cps.txt", "a") as file:
+            file.write(f"{selopt}\n")
+
     disp.place(relx=0.5, rely=0.4, anchor="center")
     ask.destroy()
     menu.destroy()
     confirmbutton.destroy()
 
-    with open("cps.txt","a") as file:
-        file.write(f"{selopt}\n")
-
     crhomebutton()
     crhistorrybutton()
+
 
 #reset user interface
 def resetui():
@@ -124,6 +157,8 @@ def resetui():
 def start():
     dropdown()
     crhomebutton()
+    crhistorrybutton()
+
 
 start()
 
