@@ -1,4 +1,5 @@
 import os
+import heapq
 import pprint
 import tkinter as tk
 import tkinter.font as tkfont
@@ -117,13 +118,15 @@ def GetLineDistance(mark1, mark2):
     return mark1.GetLineDistance(mark2)
 
 
+#? HOW DOES THIS WORK
+
 def GetPathLength(graph, startCoords, endCoords):
     visited = set()
     toVisit = [(startCoords, 0)]
 
     while (toVisit):
 
-        current, dist = toVisit.pop(0)
+        current, dist = heapq.heappop(toVisit)  #.pop(0)
 
         if current == endCoords:
             return dist
@@ -132,13 +135,13 @@ def GetPathLength(graph, startCoords, endCoords):
 
         for neighbor, length in graph[current].items():
             if neighbor not in visited:
-                toVisit.append((neighbor, dist + length))
+                # toVisit.append((neighbor, dist + length))
+                heapq.heappush(toVisit, (neighbor, dist + length))
 
     return None
 
 
 def GetJunctions(pathMarkers):
-
     junctions = defaultdict(list)
 
     for pathIndex, path in enumerate(pathMarkers):
@@ -182,7 +185,7 @@ def BuildGraph(pathMarkerList):
 # root window
 root = tk.Tk("Nav_sys")
 
-root.geometry("800x600")
+root.geometry("680x640")
 root.title("Campus Navigation System")
 
 
@@ -190,7 +193,11 @@ root.title("Campus Navigation System")
 cwd = os.getcwd()
 file = os.path.join(cwd, "coords.txt")
 
+backgroundImagePath = os.path.join(cwd, "cps.png")
+backgroundImage = tk.PhotoImage(file = backgroundImagePath)
+
 map = CreateMap(root, "black")
+map.create_image(0, 0, anchor="nw", image=backgroundImage)
 
 locationMarkers, pathMarkerList = GetMarkersFromFile(file)
 DrawPathsFromMarkers(pathMarkerList, map)
@@ -201,7 +208,7 @@ pprint.pprint(graph)
 # junctions = GetJunctions(pathMarkerList)
 # print(junctions)
 
-distance = GetPathLength(graph, (100, 100), (300, 200))
+distance = GetPathLength(graph, (100, 100), (500, 100))
 print(distance)
 
 DrawMarkers(locationMarkers, map)
