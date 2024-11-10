@@ -1,6 +1,5 @@
 import os
 import heapq
-import pprint
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk
@@ -95,19 +94,13 @@ def GetMarkersFromFile(file):
 
 
 def DrawPathsFromMarkers(pathMarkers, map, lineWidth=3):
-    paths = []
 
     # i is a single list of pathMarkers
     for marker in pathMarkers:
 
-        temp = []
         for j in range(len(marker) - 1):
-            line = map.create_line(
+            map.create_line(
                 marker[j].coords, marker[j + 1].coords, fill="white", width=lineWidth)
-
-            paths.append(line)
-
-        paths.append(temp)
 
 
 def GetLineDistance(mark1, mark2):
@@ -120,40 +113,39 @@ def GetLineDistance(mark1, mark2):
 
 #? HOW DOES THIS WORK
 
-def GetPathLength(graph, startCoords, endCoords):
-    visited = set()
-    toVisit = [(startCoords, 0)]
+def GetPathLength(graph, start_coords, end_coords):
+    # Priority queue to store (current distance, node) tuples
+    to_visit = [(0, start_coords)]
+    # Dictionary to keep track of the shortest distance to each node
+    shortest_distances = {start_coords: 0}
+    # Dictionary to keep track of the predecessor of each node in the shortest path
+    predecessors = {}
 
-    while (toVisit):
+    while to_visit:
+        # Pop the node with the smallest distance from the queue
+        current_dist, current_node = heapq.heappop(to_visit)
 
-        current, dist = heapq.heappop(toVisit)  #.pop(0)
+        # If we reach the destination node, reconstruct the path
+        if current_node == end_coords:
+            path = []
+            while current_node is not None:
+                path.append(current_node)
+                current_node = predecessors.get(current_node)
+            path.reverse()  # Reverse to get the path from start to end
+            return current_dist, path
 
-        if current == endCoords:
-            return dist
+        # Explore neighbors of the current node
+        for neighbor, length in graph[current_node].items():
+            # Calculate the distance to this neighbor
+            new_dist = current_dist + length
 
-        visited.add(current)
+            # If the calculated distance is shorter, update the shortest distance and add to the queue
+            if neighbor not in shortest_distances or new_dist < shortest_distances[neighbor]:
+                shortest_distances[neighbor] = new_dist
+                predecessors[neighbor] = current_node  # Track the predecessor for path reconstruction
+                heapq.heappush(to_visit, (new_dist, neighbor))
 
-        for neighbor, length in graph[current].items():
-            if neighbor not in visited:
-                # toVisit.append((neighbor, dist + length))
-                heapq.heappush(toVisit, (neighbor, dist + length))
-
-    return None
-
-
-def GetJunctions(pathMarkers):
-    junctions = defaultdict(list)
-
-    for pathIndex, path in enumerate(pathMarkers):
-
-        for marker in path:
-            # adding all coordinates as keys and the index as values
-            junctions[marker.coords].append(pathIndex)
-
-    # removing all non junction coords
-    junctions = {coords: paths for coords, paths in junctions.items() if len(paths) > 1} # think of paths as the count of paths
-
-    return junctions
+    return None, None  # If there's no path
 
 
 def GetDistance(coords1, coords2):
@@ -182,10 +174,16 @@ def BuildGraph(pathMarkerList):
     return graph
 
 
+def HighlightPath(path):
+    
+    for i in range(len(path) - 1):
+        map.create_line(
+            path[i], path[i + 1], fill="blue", width=3)
+
 # root window
 root = tk.Tk("Nav_sys")
 
-root.geometry("680x640")
+root.geometry("850x800")
 root.title("Campus Navigation System")
 
 
@@ -193,27 +191,35 @@ root.title("Campus Navigation System")
 cwd = os.getcwd()
 file = os.path.join(cwd, "coords.txt")
 
-backgroundImagePath = os.path.join(cwd, "cps.png")
+backgroundImagePath = os.path.join(cwd, "map.png")
 backgroundImage = tk.PhotoImage(file = backgroundImagePath)
 
 map = CreateMap(root, "black")
 map.create_image(0, 0, anchor="nw", image=backgroundImage)
 
+#!---------------------------------------------------------------------------------------------------------------------------
+
+def PrintCoords(event):
+    print(f"({event.x}, {event.y})")
+
+
+map.bind("<Button-1>", PrintCoords)
+
+#!---------------------------------------------------------------------------------------------------------------------------
+
 locationMarkers, pathMarkerList = GetMarkersFromFile(file)
 DrawPathsFromMarkers(pathMarkerList, map)
 
 graph = BuildGraph(pathMarkerList)
-pprint.pprint(graph)
 
-# junctions = GetJunctions(pathMarkerList)
-# print(junctions)
-
-distance = GetPathLength(graph, (100, 100), (500, 100))
+distance, path = GetPathLength(graph, (623, 695), (479, 361))
 print(distance)
+print(path)
+
+HighlightPath(path)
 
 DrawMarkers(locationMarkers, map)
 DrawMarkers(pathMarkerList, map)
-
 
 root.bind("<Escape>", CloseWindow)
 
