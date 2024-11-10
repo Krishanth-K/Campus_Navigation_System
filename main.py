@@ -1,11 +1,8 @@
 import os
 import heapq
 import tkinter as tk
-import tkinter.font as tkfont
-from tkinter import ttk
 from parser import ParseFile
 from math import sqrt
-from collections import defaultdict
 
 
 # markers are "location pins" on the map
