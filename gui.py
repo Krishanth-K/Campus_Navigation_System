@@ -31,7 +31,7 @@ right.grid(row=0, column=1, sticky="nswe")
 
 # Dropdown menu
 def dropdown():
-    global ask, sel, menu, confirmbutton, placeholder_label
+    global ask, sel, menu, confirmbutton, placeholder
     ask = ttk.Label(left, text="Select destination", font=cusfont, background="black", foreground="white")
     ask.place(relx=0.5, rely=0.3, anchor="center")
     
@@ -44,12 +44,12 @@ def dropdown():
     menu.place(relx=0.5, rely=0.5, anchor="center")
 
     # Add placeholder label centered on top of the dropdown
-    placeholder_label = ttk.Label(left, text="Pick an option below", font=cusfont, foreground="gray")
-    placeholder_label.place(relx=0.5, rely=0.5, anchor="center")
+    placeholder = ttk.Label(left, text="Pick an option below", font=cusfont, foreground="gray")
+    placeholder.place(relx=0.5, rely=0.5, anchor="center")
 
     # Hide the placeholder text when an option is selected
     def on_select(event):
-        placeholder_label.place_forget()
+        placeholder.place_forget()
     
     menu.bind("<<ComboboxSelected>>", on_select)
 
@@ -83,6 +83,7 @@ def crhistorrybutton():
 def clhistorybutton():
     global log
     resetui()
+    placeholder.destroy()
     try:
         disp.destroy()
     except:
@@ -125,6 +126,7 @@ def clconfirmbutton():
 
     if not selopt:
         disp = ttk.Label(left, text="No option selected", font=cusfont, background="black", foreground="white")
+        placeholder.destroy()
     else:
         disp = ttk.Label(left, text=f"Selected Destination: {selopt}", font=cusfont, background="black", foreground="white")
         with open("cps.txt", "a") as file:
@@ -134,6 +136,7 @@ def clconfirmbutton():
     ask.destroy()
     menu.destroy()
     confirmbutton.destroy()
+    placeholder.destroy()
 
     crhomebutton()
     crhistorrybutton()

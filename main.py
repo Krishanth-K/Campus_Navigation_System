@@ -207,6 +207,7 @@ map.bind("<Button-1>", PrintCoords)
 locationMarkers, pathMarkerList = GetMarkersFromFile(file)
 DrawPathsFromMarkers(pathMarkerList, map)
 
+
 graph = BuildGraph(pathMarkerList)
 
 distance, path = GetPathLength(graph, (623, 695), (479, 361))
