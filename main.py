@@ -1,17 +1,15 @@
 import os
 import heapq
 import tkinter as tk
-import tkinter.font as tkfont
-from tkinter import ttk
 from parser import ParseFile
 from math import sqrt
-from collections import defaultdict
 
 
 # markers are "location pins" on the map
 class Marker():
-    def __init__(self, coords, color="Red"):
+    def __init__(self, coords, name=None, color="Red"):
         self.coords = coords
+        self.name = name
         self.color = color
 
     # returns the distance between a marker and other along a straight line
@@ -30,14 +28,14 @@ class Marker():
 
 # subclass of Marker with default color as blue
 class LocationMarker(Marker):
-    def __init__(self, coords, color="blue"):
-        super().__init__(coords, color)
+    def __init__(self, coords, name=None, color="blue"):
+        super().__init__(coords, name, color)
 
 
 # subclass of Marker with default color as green
 class PathMarker(Marker):
-    def __init__(self, coords, color="red"):
-        super().__init__(coords, color)
+    def __init__(self, coords, name=None, color="red"):
+        super().__init__(coords, name, color)
 
 
 def CloseWindow(event=None):
@@ -78,10 +76,10 @@ def GetMarkersFromFile(file):
     locationMarkers = []
     pathMarkers = []
 
-    locationMarkerCoords, pathMarkerCoords = ParseFile(file)
+    locationMarkerCoords, locationMarkersNames, pathMarkerCoords = ParseFile(file)
 
-    for i in locationMarkerCoords:
-        locationMarkers.append(LocationMarker(i))
+    for i in range(len(locationMarkerCoords)):
+        locationMarkers.append(LocationMarker(locationMarkerCoords[i], name=locationMarkersNames[i]))
 
     for i in pathMarkerCoords:
         temp = []
@@ -180,6 +178,13 @@ def HighlightPath(path):
         map.create_line(
             path[i], path[i + 1], fill="blue", width=3)
 
+
+def GetCoordsFromName(name):
+    global locationMarkersList
+    for i in locationMarkersList:
+        if i.name.strip() == name:
+            return i.coords
+
 # root window
 root = tk.Tk("Nav_sys")
 
@@ -199,26 +204,30 @@ map.create_image(0, 0, anchor="nw", image=backgroundImage)
 
 #!---------------------------------------------------------------------------------------------------------------------------
 
-def PrintCoords(event):
-    print(f"({event.x}, {event.y})")
+# def PrintCoords(event):
+#     print(f"({event.x}, {event.y})")
 
 
-map.bind("<Button-1>", PrintCoords)
+# map.bind("<Button-1>", PrintCoords)
 
 #!---------------------------------------------------------------------------------------------------------------------------
 
-locationMarkers, pathMarkerList = GetMarkersFromFile(file)
+locationMarkersList, pathMarkerList = GetMarkersFromFile(file)
 DrawPathsFromMarkers(pathMarkerList, map)
 
 graph = BuildGraph(pathMarkerList)
 
-distance, path = GetPathLength(graph, (623, 695), (479, 361))
-print(distance)
+a = "ab3"
+b = "canteen"
+
+distance, path = GetPathLength(graph, GetCoordsFromName(a), GetCoordsFromName(b))
+# print(distance)
 print(path)
+
 
 HighlightPath(path)
 
-DrawMarkers(locationMarkers, map)
+DrawMarkers(locationMarkersList, map)
 DrawMarkers(pathMarkerList, map)
 
 root.bind("<Escape>", CloseWindow)

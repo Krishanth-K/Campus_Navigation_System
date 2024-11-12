@@ -3,6 +3,8 @@ def ParseFile(filePath):
 
     locationMarkerCoords = []
     PathMarkerCoords = []
+    locationMarkerNames = []
+    PathMarkerNames = []
 
     with open(filePath, "r") as file:
         lines = file.readlines()
@@ -17,12 +19,17 @@ def ParseFile(filePath):
                 # check if next line exists
                 if i + 1 < len(lines):
                     coordsLine = lines[i + 1].strip()
-                    coordsLine = coordsLine.removeprefix("(").removesuffix(")").strip()
+                    [coords, name] = coordsLine.split("#")
+                    coords = coords.strip()
+                    name = name.strip()
+                    coords = coords.removeprefix("(").strip().removesuffix(")")
                     # print(coordsLine)
                     #convert the integers into a tuple
-                    coord = tuple(map(int, coordsLine.split(", ")))
+                    coord = tuple(map(int, coords.split(", ")))
 
                     locationMarkerCoords.append(coord)
+                    locationMarkerNames.append(name)
+                    
 
             if line.startswith("Path"):
                 pathCoords = []
@@ -52,4 +59,4 @@ def ParseFile(filePath):
 
                 PathMarkerCoords.append(pathCoords)
 
-    return locationMarkerCoords, PathMarkerCoords
+    return locationMarkerCoords, locationMarkerNames, PathMarkerCoords 
