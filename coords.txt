@@ -15,19 +15,19 @@
 
 
 Location:
-(301, 591) # ab1
+(301, 591) # AB1
 Location:
-(698, 76) # ab2
+(698, 76) # AB2
 Location:
-(682, 696) # ab3
+(682, 696) # AB3
 Location:
-(687, 364) # library
+(687, 364) # Library
 Location:
-(68, 362) # postoffice
+(68, 362) # Post Office
 Location:
-(112, 139) # canteen
+(112, 139) # Canteen
 Location:
-(478, 315) # ab4
+(478, 315) # Main Office
 
 
 Path:

@@ -66,15 +66,9 @@ def DrawMarkers(markers, canvas):
 
 # creates and returns a canvas of entered background color
 def CreateMap(root, canvasBackground):
-
-    canvas = tk.Canvas(right, bg=canvasBackground, width=850, height=800, highlightthickness=0)
-    # canvas.grid(row=0, column=1, sticky="nswe")
-    # canvas.pack(fill=tk.BOTH, expand=True, side="right")
+    canvas = tk.Canvas(right, bg=canvasBackground)
+    canvas.pack(fill=tk.BOTH, expand=True, side="right")
     # canvas.grid_configure()
-
-    canvas.grid(row=0, column=0, sticky="")  # No sticky option to center it
-    right.grid_rowconfigure(0, weight=1)  # Allow row to expand
-    right.grid_columnconfigure(0, weight=1)  # Allow column to expand
 
     return canvas
 
@@ -186,12 +180,6 @@ def HighlightPath(path):
         map.create_line(
             path[i], path[i + 1], fill="blue", width=3)
 
-def UnhighlightPreviousPath(path):
-    for i in range(len(path) - 1):
-        map.create_line(
-            path[i], path[i + 1], fill="black", width=3)
-
-
 
 def GetCoordsFromName(name):
     global locationMarkersList
@@ -214,9 +202,18 @@ backgroundImagePath = os.path.join(cwd, "map.png")
 backgroundImage = tk.PhotoImage(file = backgroundImagePath)
 
 
+#!---------------------------------------------------------------------------------------------------------------------------
+
+# def PrintCoords(event):
+#     print(f"({event.x}, {event.y})")
+
+
+# map.bind("<Button-1>", PrintCoords)
+
+#!---------------------------------------------------------------------------------------------------------------------------
 #*---------------------------------------------------------------------------------------------------------------------------
 
-#Custom font
+# Custom font
 cusfont = tkfont.Font(family="Aptos", size=14)
 
 # Container frame
@@ -229,11 +226,11 @@ main_frame.grid_columnconfigure(1, weight=1)
 main_frame.grid_rowconfigure(0, weight=1)
 
 # Left frame in main frame
-left = tk.Frame(main_frame, width=300, height=800, bg="black")
+left = tk.Frame(main_frame, width=300, height=600, bg="black")
 left.grid(row=0, column=0, sticky="nswe")
 
 # Right frame in main frame
-right = tk.Frame(main_frame, width=850, height=800, bg="#3e3f43")
+right = tk.Frame(main_frame, width=900, height=600, bg="white")
 right.grid(row=0, column=1, sticky="nswe")
 
 # Dropdown menu
@@ -242,7 +239,7 @@ def dropdown():
     global ask0, sel0, menu0, placeholder0
     
     #starting point menu
-    options = ["Main gate","AB1", "AB2", "AB3", "Library", "Canteen", "Main Office", "Post Office"]
+    options = ["Main gate","AB1", "AB2", "AB3", "Library", "Canteen", "Main office", "Post Office"]
     sel = tk.StringVar()
     sel0 = tk.StringVar()
     
@@ -321,16 +318,10 @@ def clclrhistorybutton():
     log.config(text="History cleared")
     clrhistorybutton.destroy()
 
-selopt = None
-startopt = None
-
 # Clicking confirm button
 def clconfirmbutton():
-    global selopt, startopt
     selopt = sel.get()
     startopt = sel0.get()
-
-    UpdateMap(startopt, selopt)
 
     if not selopt:
         disp_text = "No option selected for destination"
@@ -364,39 +355,20 @@ def start():
 map = CreateMap(root, "black")
 map.create_image(0, 0, anchor="nw", image=backgroundImage)
 
-#!---------------------------------------------------------------------------------------------------------------------------
-
-def UpdateMap(a, b):
-
-    global previousPath
-    UnhighlightPreviousPath(previousPath)
-
-    path = []
-    distance, path = GetPathLength(graph, GetCoordsFromName(a), GetCoordsFromName(b))
-    # print(path)
-
-    previousPath = path
-
-    HighlightPath(path)
-
-def PrintCoords(event):
-    print(f"({event.x}, {event.y})")
-
-
-map.bind("<Button-1>", PrintCoords)
-
-#!---------------------------------------------------------------------------------------------------------------------------
 
 locationMarkersList, pathMarkerList = GetMarkersFromFile(file)
+DrawPathsFromMarkers(pathMarkerList, map)
 
 graph = BuildGraph(pathMarkerList)
 
-previousPath = []
+a = "ab3"
+b = "canteen"
 
-a = GetCoordsFromName("Main Office")
-b = GetCoordsFromName("Post Office")
+distance, path = GetPathLength(graph, GetCoordsFromName(a), GetCoordsFromName(b))
+# print(distance)
+# print(path)
 
-UpdateMap(a, b)
+HighlightPath(path)
 
 DrawMarkers(locationMarkersList, map)
 DrawMarkers(pathMarkerList, map)
