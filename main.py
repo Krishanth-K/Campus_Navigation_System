@@ -215,6 +215,7 @@ map.create_image(0, 0, anchor="nw", image=backgroundImage)
 locationMarkersList, pathMarkerList = GetMarkersFromFile(file)
 DrawPathsFromMarkers(pathMarkerList, map)
 
+
 graph = BuildGraph(pathMarkerList)
 
 a = "ab3"
