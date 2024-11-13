@@ -4,7 +4,6 @@ def ParseFile(filePath):
     locationMarkerCoords = []
     PathMarkerCoords = []
     locationMarkerNames = []
-    PathMarkerNames = []
 
     with open(filePath, "r") as file:
         lines = file.readlines()

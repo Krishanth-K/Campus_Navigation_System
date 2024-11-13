@@ -1,2 +1,1 @@
-Library -> AB2
-Library -> Library
+Canteen -> Library

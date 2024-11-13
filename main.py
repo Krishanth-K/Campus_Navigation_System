@@ -14,18 +14,6 @@ class Marker():
         self.name = name
         self.color = color
 
-    # returns the distance between a marker and other along a straight line
-    def GetLineDistance(self, other):
-
-        # if not isinstance(Marker):
-        #     raise Exception("Not an instance of Marker")
-
-        x1, y1 = self.coords
-        x2, y2 = other.coords
-
-        distance = sqrt((x2 - x1)**2 + (y2-y1)**2)
-
-        return distance
 
 
 # subclass of Marker with default color as blue
@@ -107,14 +95,6 @@ def DrawPathsFromMarkers(pathMarkers, map, lineWidth=3):
         for j in range(len(marker) - 1):
             map.create_line(
                 marker[j].coords, marker[j + 1].coords, fill="white", width=lineWidth)
-
-
-def GetLineDistance(mark1, mark2):
-
-    if not isinstance(mark1, Marker) and isinstance(mark2, Marker):
-        raise Exception("Not an instance of Marker")
-
-    return mark1.GetLineDistance(mark2)
 
 
 #? HOW DOES THIS WORK
@@ -204,6 +184,8 @@ root = tk.Tk("Nav_sys")
 
 root.geometry("850x800")
 root.title("Campus Navigation System")
+root.state("zoomed")
+# root.attributes("-fullscreen", True)
 
 
 # paths handling using os
@@ -330,7 +312,6 @@ def clconfirmbutton():
     selopt = sel.get()
     startopt = sel0.get()
 
-    UpdateMap(startopt, selopt)
 
     if not selopt:
         disp_text = "No option selected for destination"
@@ -342,6 +323,10 @@ def clconfirmbutton():
             file.write(f"{startopt} -> {selopt}\n")
 
     resetui()
+
+    if not (startopt == "" or selopt == ""):
+        UpdateMap(startopt, selopt)
+
     global disp
     disp = ttk.Label(left, text=disp_text, font=cusfont, background="black", foreground="white")
     disp.place(relx=0.5, rely=0.4, anchor="center")
@@ -398,7 +383,7 @@ b = GetCoordsFromName("Post Office")
 
 UpdateMap(a, b)
 
-DrawMarkers(locationMarkersList, map)
+# DrawMarkers(locationMarkersList, map)
 DrawMarkers(pathMarkerList, map)
 
 root.bind("<Escape>", CloseWindow)
