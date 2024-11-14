@@ -15,7 +15,6 @@ class Marker():
         self.color = color
 
 
-
 # subclass of Marker with default color as blue
 class LocationMarker(Marker):
     def __init__(self, coords, name=None, color="blue"):
@@ -56,13 +55,10 @@ def DrawMarkers(markers, canvas):
 def CreateMap(root, canvasBackground):
 
     canvas = tk.Canvas(right, bg=canvasBackground, width=850, height=800, highlightthickness=0)
-    # canvas.grid(row=0, column=1, sticky="nswe")
-    # canvas.pack(fill=tk.BOTH, expand=True, side="right")
-    # canvas.grid_configure()
 
-    canvas.grid(row=0, column=0, sticky="")  # No sticky option to center it
-    right.grid_rowconfigure(0, weight=1)  # Allow row to expand
-    right.grid_columnconfigure(0, weight=1)  # Allow column to expand
+    canvas.grid(row=0, column=0, sticky="") 
+    right.grid_rowconfigure(0, weight=1) 
+    right.grid_columnconfigure(0, weight=1) 
 
     return canvas
 
@@ -87,23 +83,15 @@ def GetMarkersFromFile(file):
     return locationMarkers, pathMarkers
 
 
-def DrawPathsFromMarkers(pathMarkers, map, lineWidth=3):
-
-    # i is a single list of pathMarkers
-    for marker in pathMarkers:
-
-        for j in range(len(marker) - 1):
-            map.create_line(
-                marker[j].coords, marker[j + 1].coords, fill="white", width=lineWidth)
-
-
-#? HOW DOES THIS WORK
-
+# uses Djikstra's algo to find the shortest path between two coords from the graph
 def GetPathLength(graph, start_coords, end_coords):
+
     # Priority queue to store (current distance, node) tuples
     to_visit = [(0, start_coords)]
+
     # Dictionary to keep track of the shortest distance to each node
     shortest_distances = {start_coords: 0}
+
     # Dictionary to keep track of the predecessor of each node in the shortest path
     predecessors = {}
 
@@ -117,29 +105,32 @@ def GetPathLength(graph, start_coords, end_coords):
             while current_node is not None:
                 path.append(current_node)
                 current_node = predecessors.get(current_node)
-            path.reverse()  # Reverse to get the path from start to end
+            path.reverse()  
             return current_dist, path
 
         # Explore neighbors of the current node
         for neighbor, length in graph[current_node].items():
+            
             # Calculate the distance to this neighbor
             new_dist = current_dist + length
 
             # If the calculated distance is shorter, update the shortest distance and add to the queue
             if neighbor not in shortest_distances or new_dist < shortest_distances[neighbor]:
                 shortest_distances[neighbor] = new_dist
-                predecessors[neighbor] = current_node  # Track the predecessor for path reconstruction
+                predecessors[neighbor] = current_node 
                 heapq.heappush(to_visit, (new_dist, neighbor))
 
     return None, None  # If there's no path
 
 
+# returns the straight line distance between two coords
 def GetDistance(coords1, coords2):
     x1, y1 = coords1
     x2, y2 = coords2
     return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
+# converts the path markers into a graph format
 def BuildGraph(pathMarkerList):
     graph = {}
 
@@ -160,24 +151,38 @@ def BuildGraph(pathMarkerList):
     return graph
 
 
+# highlights the entered path
 def HighlightPath(path):
     
     for i in range(len(path) - 1):
         map.create_line(
             path[i], path[i + 1], fill="blue", width=3)
 
+# unhighlights the entered path
 def UnhighlightPreviousPath(path):
     for i in range(len(path) - 1):
         map.create_line(
             path[i], path[i + 1], fill="black", width=3)
 
 
-
+# Returns the coords of a marker from its name
 def GetCoordsFromName(name):
     global locationMarkersList
     for i in locationMarkersList:
         if i.name.strip() == name:
             return i.coords
+
+# update map with the new coords
+def UpdateMap(a, b):
+
+    global previousPath
+    UnhighlightPreviousPath(previousPath)
+
+    path = []
+    distance, path = GetPathLength(graph, GetCoordsFromName(a), GetCoordsFromName(b))
+    previousPath = path
+
+    HighlightPath(path)
 
 # root window
 root = tk.Tk("Nav_sys")
@@ -224,7 +229,7 @@ def dropdown():
     global ask0, sel0, menu0, placeholder0
     
     #starting point menu
-    options = ["Main gate","AB1", "AB2", "AB3", "Library", "Canteen", "Main Office", "Post Office"]
+    options = ["AB1", "AB2", "AB3", "Library", "Canteen", "Main Office", "Post Office"]
     sel = tk.StringVar()
     sel0 = tk.StringVar()
     
@@ -344,44 +349,19 @@ def start():
     dropdown()
     crhomebutton()
     crhistorrybutton()
+
 #*---------------------------------------------------------------------------------------------------------------------------
 
 map = CreateMap(root, "black")
 map.create_image(0, 0, anchor="nw", image=backgroundImage)
 
-#!---------------------------------------------------------------------------------------------------------------------------
-
-def UpdateMap(a, b):
-
-    global previousPath
-    UnhighlightPreviousPath(previousPath)
-
-    path = []
-    distance, path = GetPathLength(graph, GetCoordsFromName(a), GetCoordsFromName(b))
-    # print(path)
-
-    previousPath = path
-
-    HighlightPath(path)
-
-def PrintCoords(event):
-    print(f"({event.x}, {event.y})")
 
 
-map.bind("<Button-1>", PrintCoords)
-
-#!---------------------------------------------------------------------------------------------------------------------------
 
 locationMarkersList, pathMarkerList = GetMarkersFromFile(file)
 
 graph = BuildGraph(pathMarkerList)
-
 previousPath = []
-
-a = GetCoordsFromName("Main Office")
-b = GetCoordsFromName("Post Office")
-
-UpdateMap(a, b)
 
 # DrawMarkers(locationMarkersList, map)
 DrawMarkers(pathMarkerList, map)
