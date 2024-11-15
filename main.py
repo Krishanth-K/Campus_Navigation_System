@@ -364,7 +364,7 @@ graph = BuildGraph(pathMarkerList)
 previousPath = []
 
 # DrawMarkers(locationMarkersList, map)
-DrawMarkers(pathMarkerList, map)
+# DrawMarkers(pathMarkerList, map)
 
 root.bind("<Escape>", CloseWindow)
 
